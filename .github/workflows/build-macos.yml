@@ -1,0 +1,86 @@
+name: Build macOS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Install CocoaPods dependencies
+        working-directory: macos
+        run: bundle exec pod install
+
+      - name: Build macOS app
+        working-directory: macos
+        run: |
+          xcodebuild -workspace LottieViewer.xcworkspace \
+            -scheme LottieViewer-macOS \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Find and archive app bundle
+        working-directory: macos
+        run: |
+          # Find the .app bundle in the derived data build directory
+          APP_BUNDLE=$(find build -name "LottieViewer.app" -type d | head -1)
+          
+          if [ -z "$APP_BUNDLE" ]; then
+            echo "Error: Could not find LottieViewer.app bundle"
+            exit 1
+          fi
+          
+          # Copy to a known location and create zip archive
+          if ! cp -R "$APP_BUNDLE" build/LottieViewer.app; then
+            echo "Error: Failed to copy app bundle to build/LottieViewer.app"
+            exit 1
+          fi
+          
+          if ! cd build; then
+            echo "Error: Failed to change directory to build/"
+            exit 1
+          fi
+          
+          if ! zip -r ../LottieViewer-macOS.zip LottieViewer.app; then
+            echo "Error: Failed to create zip archive"
+            exit 1
+          fi
+          
+          echo "APP_BUNDLE_PATH=build/LottieViewer.app" >> $GITHUB_ENV
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LottieViewer-macOS
+          path: |
+            macos/LottieViewer-macOS.zip
+            macos/build/LottieViewer.app
+          retention-days: 7
