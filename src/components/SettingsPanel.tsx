@@ -25,6 +25,20 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
 }) => {
   const [speedTrackWidth, setSpeedTrackWidth] = useState(200);
   const [progressTrackWidth, setProgressTrackWidth] = useState(200);
+
+  const handleSliderPress = (
+    e: any,
+    trackWidth: number,
+    min: number,
+    max: number,
+    onChange: (value: number) => void
+  ) => {
+    const {locationX} = e.nativeEvent;
+    const percentage = Math.max(0, Math.min(1, locationX / trackWidth));
+    const value = min + percentage * (max - min);
+    onChange(value);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Controls</Text>
@@ -37,12 +51,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <TouchableOpacity
             style={styles.sliderTrack}
             onLayout={(e) => setSpeedTrackWidth(e.nativeEvent.layout.width)}
-            onPress={(e) => {
-              const {locationX} = e.nativeEvent;
-              const percentage = Math.max(0, Math.min(1, locationX / speedTrackWidth));
-              const newSpeed = 0.1 + percentage * 2.9;
-              onSpeedChange(parseFloat(newSpeed.toFixed(1)));
-            }}
+            onPress={(e) =>
+              handleSliderPress(e, speedTrackWidth, 0.1, 3.0, (val) =>
+                onSpeedChange(parseFloat(val.toFixed(1)))
+              )
+            }
             activeOpacity={1}>
             <View
               style={[
@@ -85,14 +98,17 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <TouchableOpacity
             style={styles.sliderTrack}
             onLayout={(e) => setProgressTrackWidth(e.nativeEvent.layout.width)}
-            onPress={(e) => {
-              const {locationX} = e.nativeEvent;
-              const percentage = Math.max(0, Math.min(1, locationX / progressTrackWidth));
-              onProgressChange(percentage);
-            }}
+            onPress={(e) =>
+              handleSliderPress(e, progressTrackWidth, 0, 1, onProgressChange)
+            }
             activeOpacity={1}>
             <View style={[styles.sliderFill, {width: `${progress * 100}%`}]} />
-            <View style={[styles.sliderThumb, {left: `${progress * 100}%`}]} />
+            <View
+              style={[
+                styles.sliderThumb,
+                {left: `${Math.max(0, Math.min(100, progress * 100))}%`},
+              ]}
+            />
           </TouchableOpacity>
           <Text style={styles.sliderLabel}>100%</Text>
         </View>
@@ -166,15 +182,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     minWidth: 35,
-  },
-  numberInput: {
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 4,
-    padding: 8,
-    marginTop: 8,
-    fontSize: 14,
-    backgroundColor: '#ffffff',
   },
   toggleRow: {
     flexDirection: 'row',

@@ -18,9 +18,13 @@ function App(): React.JSX.Element {
   const handleOpenFile = async () => {
     const filePath = await openFilePicker();
     if (filePath) {
+      // Reset all controls to defaults when loading a new file
       setFileSource(filePath);
+      setSpeed(1.0);
+      setAutoplay(true);
+      setLoop(true);
       setProgress(0);
-      setIsPlaying(autoplay);
+      setIsPlaying(true);
     }
   };
 
@@ -55,10 +59,13 @@ function App(): React.JSX.Element {
   };
 
   const handleProgressChange = (newProgress: number) => {
-    setProgress(newProgress);
-    if (animationRef.current && fileSource) {
-      animationRef.current.setProgress(newProgress);
+    // Pause animation when scrubbing
+    if (animationRef.current && fileSource && isPlaying) {
+      animationRef.current.pause();
+      setIsPlaying(false);
     }
+    setProgress(newProgress);
+    // The progress prop will handle seeking in LottiePlayer
   };
 
   return (

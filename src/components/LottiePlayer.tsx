@@ -1,4 +1,4 @@
-import React, {useRef, useEffect, forwardRef, useImperativeHandle} from 'react';
+import React, {useRef, useEffect, forwardRef, useImperativeHandle, useState} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import LottieView from 'lottie-react-native';
 import type {LottiePlayerProps} from '../types';
@@ -18,6 +18,7 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
   progress,
 }, ref) => {
   const animationRef = useRef<LottieView>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useImperativeHandle(ref, () => ({
     play: () => {
@@ -30,29 +31,48 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
       animationRef.current?.reset();
     },
     setProgress: (prog: number) => {
-      // Progress is controlled via props, but we can reset and play from this point
+      // Seek to specific progress position
       if (animationRef.current) {
-        animationRef.current.reset();
-        // Note: We'll need to handle progress updates via props
+        // Pause first, then set progress
+        animationRef.current.pause();
+        // The progress prop will handle the actual seeking
       }
     },
   }));
 
-  // Handle progress changes - reset and seek to position
+  // Track if we're manually scrubbing
+  const isScrubbingRef = useRef<boolean>(false);
+  const prevProgressRef = useRef<number>(progress);
+  
+  // Handle progress changes - seek to position when manually changed
   useEffect(() => {
     if (animationRef.current && source && progress !== undefined) {
-      // Reset and play from the progress point
-      animationRef.current.reset();
-      // Progress is handled via the progress prop on LottieView
+      // Check if this is a manual progress change (large jump = scrubbing)
+      const progressDiff = Math.abs(progress - prevProgressRef.current);
+      const isManualChange = progressDiff > 0.05; // Threshold for manual scrubbing
+      
+      if (isManualChange) {
+        // Manual scrub - pause and seek to position
+        isScrubbingRef.current = true;
+        animationRef.current.pause();
+      } else {
+        // Small changes indicate scrubbing has stopped or animation is playing normally
+        isScrubbingRef.current = false;
+      }
+      
+      prevProgressRef.current = progress;
     }
   }, [progress, source]);
 
-  // Handle source changes - reset animation
+  // Handle source changes - reset animation and clear errors
   useEffect(() => {
-    if (animationRef.current && source) {
-      animationRef.current.reset();
-      if (autoplay) {
-        animationRef.current.play();
+    if (source) {
+      setLoadError(null); // Clear any previous errors when loading new file
+      if (animationRef.current) {
+        animationRef.current.reset();
+        if (autoplay) {
+          animationRef.current.play();
+        }
       }
     }
   }, [source, autoplay]);
@@ -74,6 +94,16 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
         <Text style={styles.placeholderText}>
           No file selected{'\n'}Click "Open File" to select a .lottie file
         </Text>
+      </View>
+    );
+  }
+
+  // Show error message if loading failed
+  if (loadError) {
+    return (
+      <View style={styles.placeholder}>
+        <Text style={styles.errorTitle}>Failed to load animation</Text>
+        <Text style={styles.errorText}>{loadError}</Text>
       </View>
     );
   }
@@ -110,7 +140,7 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
         key={source} // Force re-render when source changes
         ref={animationRef}
         source={lottieSource}
-        autoPlay={autoplay}
+        autoPlay={autoplay && !isScrubbingRef.current}
         loop={loop}
         speed={speed}
         progress={progress}
@@ -119,9 +149,21 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
         onAnimationFailure={(error) => {
           console.error('Lottie animation failed to load:', error);
           console.error('Source URI:', lottieSource.uri);
+          // Extract error message
+          const errorMessage = typeof error === 'string' 
+            ? error 
+            : error?.message || 'Unknown error occurred while loading the animation';
+          setLoadError(errorMessage);
         }}
-        onAnimationLoad={() => {
+        onAnimationLoaded={() => {
           console.log('Lottie animation loaded successfully');
+          setLoadError(null); // Clear any previous errors on successful load
+        }}
+        onAnimationLoop={() => {
+          // Update progress when animation loops (if not scrubbing)
+          if (!isScrubbingRef.current && animationRef.current) {
+            // Progress will be managed by the animation itself
+          }
         }}
       />
     </View>
@@ -149,6 +191,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#d32f2f',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    lineHeight: 20,
   },
 });
 
