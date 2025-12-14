@@ -1,12 +1,16 @@
-import React, {useState, useRef} from 'react';
-import {View, StyleSheet} from 'react-native';
-import LottiePlayer, {type LottiePlayerRef} from './components/LottiePlayer';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, DeviceEventEmitter } from 'react-native';
+import LottiePlayer, { type LottiePlayerRef } from './components/LottiePlayer';
 import SettingsPanel from './components/SettingsPanel';
 import FilePickerButton from './components/FilePickerButton';
 import ErrorBoundary from './components/ErrorBoundary';
-import {openFilePicker} from './services/FilePickerService';
+import { openFilePicker } from './services/FilePickerService';
 
-function App(): React.JSX.Element {
+interface AppProps {
+  fileToOpen?: string;
+}
+
+function App(props: AppProps): React.JSX.Element {
   const [fileSource, setFileSource] = useState<string | null>(null);
   const [speed, setSpeed] = useState<number>(1.0);
   const [autoplay, setAutoplay] = useState<boolean>(true);
@@ -14,6 +18,31 @@ function App(): React.JSX.Element {
   const [progress, setProgress] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const animationRef = useRef<LottiePlayerRef>(null);
+
+  useEffect(() => {
+    const handleFileOpen = (filePath: string) => {
+      if (filePath) {
+        setFileSource(filePath);
+        setSpeed(1.0);
+        setAutoplay(true);
+        setLoop(true);
+        setProgress(0);
+        setIsPlaying(true);
+      }
+    };
+
+    if (props.fileToOpen) {
+      handleFileOpen(props.fileToOpen);
+    }
+
+    const subscription = DeviceEventEmitter.addListener('openFile', (event) => {
+      if (event.url) {
+        handleFileOpen(event.url);
+      }
+    });
+
+    return () => subscription.remove();
+  }, [props.fileToOpen]);
 
   const handleOpenFile = async () => {
     const filePath = await openFilePicker();

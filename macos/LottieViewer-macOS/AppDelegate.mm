@@ -3,6 +3,8 @@
 #import <React/RCTBundleURLProvider.h>
 #import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
 
+static NSString *pendingOpenFile = nil;
+
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
@@ -10,7 +12,11 @@
   self.moduleName = @"LottieViewer";
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
-  self.initialProps = @{};
+  NSMutableDictionary *initProps = [NSMutableDictionary new];
+  if (pendingOpenFile) {
+    initProps[@"fileToOpen"] = pendingOpenFile;
+  }
+  self.initialProps = initProps;
   self.dependencyProvider = [RCTAppDependencyProvider new];
   
   return [super applicationDidFinishLaunching:notification];
@@ -42,6 +48,14 @@
 #else
   return false;
 #endif
+}
+
+- (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename {
+  pendingOpenFile = filename;
+  if (self.bridge) {
+    [self.bridge.eventDispatcher sendAppEventWithName:@"openFile" body:@{@"url": filename}];
+  }
+  return YES;
 }
 
 @end
