@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Switch,
   Button,
-  TextInput,
   TouchableOpacity,
 } from 'react-native';
 import type {SettingsPanelProps} from '../types';
@@ -60,17 +59,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </TouchableOpacity>
           <Text style={styles.sliderLabel}>3.0x</Text>
         </View>
-        <TextInput
-          style={styles.numberInput}
-          value={speed.toFixed(1)}
-          onChangeText={(text) => {
-            const num = parseFloat(text);
-            if (!isNaN(num) && num >= 0.1 && num <= 3.0) {
-              onSpeedChange(num);
-            }
-          }}
-          keyboardType="numeric"
-        />
       </View>
 
       {/* Autoplay Toggle */}
@@ -108,17 +96,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </TouchableOpacity>
           <Text style={styles.sliderLabel}>100%</Text>
         </View>
-        <TextInput
-          style={styles.numberInput}
-          value={(progress * 100).toFixed(0)}
-          onChangeText={(text) => {
-            const num = parseFloat(text);
-            if (!isNaN(num) && num >= 0 && num <= 100) {
-              onProgressChange(num / 100);
-            }
-          }}
-          keyboardType="numeric"
-        />
       </View>
 
       {/* Playback Controls */}
