@@ -45,5 +45,6 @@ buck-out/
 # CocoaPods
 /ios/Pods/
 
-# Release artifacts
-macos/release/
+# Release artifacts - ignore everything except .zip files
+macos/release/*
+!macos/release/*.zip
