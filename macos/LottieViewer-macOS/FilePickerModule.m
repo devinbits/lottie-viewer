@@ -21,25 +21,21 @@ RCT_EXPORT_METHOD(openFilePicker:(RCTPromiseResolveBlock)resolve
     [panel setAllowsMultipleSelection:NO];
     [panel setCanChooseDirectories:NO];
     [panel setCanChooseFiles:YES];
-    [panel setAllowsOtherFileTypes:YES];
+    [panel setAllowsOtherFileTypes:NO];
+    
+    // Restrict to .lottie files only
+    [panel setAllowedFileTypes:@[@"lottie"]];
     
     NSInteger result = [panel runModal];
     
     if (result == NSModalResponseOK) {
       NSURL *url = [[panel URLs] firstObject];
       if (url) {
-        NSString *pathExtension = [[url pathExtension] lowercaseString];
-        if ([pathExtension isEqualToString:@"lottie"]) {
-          // Return the absolute file path
-          NSString *filePath = [url path];
-          NSLog(@"Selected file path: %@", filePath);
-          resolve(filePath);
-        } else {
-          NSError *error = [NSError errorWithDomain:@"FilePickerModule" 
-                                               code:1 
-                                           userInfo:@{NSLocalizedDescriptionKey: @"Please select a .lottie file"}];
-          reject(@"INVALID_FILE", @"Please select a .lottie file", error);
-        }
+        // Return the absolute file path
+        // Since we've restricted to .lottie files only, we don't need to check extension again
+        NSString *filePath = [url path];
+        NSLog(@"Selected file path: %@", filePath);
+        resolve(filePath);
       } else {
         NSError *error = [NSError errorWithDomain:@"FilePickerModule" 
                                              code:2 
