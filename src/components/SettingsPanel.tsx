@@ -1,13 +1,12 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Switch,
-  Button,
   TouchableOpacity,
 } from 'react-native';
-import type {SettingsPanelProps} from '../types';
+import type { SettingsPanelProps } from '../types';
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
   speed,
@@ -22,6 +21,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onPlay,
   onPause,
   onReset,
+  onFilePickerPress,
 }) => {
   const [speedTrackWidth, setSpeedTrackWidth] = useState(200);
   const [progressTrackWidth, setProgressTrackWidth] = useState(200);
@@ -33,7 +33,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     max: number,
     onChange: (value: number) => void
   ) => {
-    const {locationX} = e.nativeEvent;
+    const { locationX } = e.nativeEvent;
     const percentage = Math.max(0, Math.min(1, locationX / trackWidth));
     const value = min + percentage * (max - min);
     onChange(value);
@@ -42,6 +42,14 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Controls</Text>
+
+      {/* File Picker Button */}
+      <TouchableOpacity style={styles.filePickerButton} onPress={onFilePickerPress}>
+        <Text style={styles.filePickerButtonText}>📁 Open Lottie File</Text>
+      </TouchableOpacity>
+
+      {/* Divider */}
+      <View style={styles.divider} />
 
       {/* Playback Speed */}
       <View style={styles.controlGroup}>
@@ -60,13 +68,13 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <View
               style={[
                 styles.sliderFill,
-                {width: `${((speed - 0.1) / 2.9) * 100}%`},
+                { width: `${((speed - 0.1) / 2.9) * 100}%` },
               ]}
             />
             <View
               style={[
                 styles.sliderThumb,
-                {left: `${((speed - 0.1) / 2.9) * 100}%`},
+                { left: `${((speed - 0.1) / 2.9) * 100}%` },
               ]}
             />
           </TouchableOpacity>
@@ -102,11 +110,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               handleSliderPress(e, progressTrackWidth, 0, 1, onProgressChange)
             }
             activeOpacity={1}>
-            <View style={[styles.sliderFill, {width: `${progress * 100}%`}]} />
+            <View style={[styles.sliderFill, { width: `${progress * 100}%` }]} />
             <View
               style={[
                 styles.sliderThumb,
-                {left: `${Math.max(0, Math.min(100, progress * 100))}%`},
+                { left: `${Math.max(0, Math.min(100, progress * 100))}%` },
               ]}
             />
           </TouchableOpacity>
@@ -114,14 +122,23 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </View>
       </View>
 
+      {/* Divider */}
+      <View style={styles.divider} />
+
       {/* Playback Controls */}
       <View style={styles.buttonGroup}>
-        <Button
-          title={isPlaying ? 'Pause' : 'Play'}
+        <TouchableOpacity
+          style={[styles.controlButton, isPlaying ? styles.pauseButton : styles.playButton]}
           onPress={isPlaying ? onPause : onPlay}
-        />
+        >
+          <Text style={styles.controlButtonText}>
+            {isPlaying ? '⏸ Pause' : '▶ Play'}
+          </Text>
+        </TouchableOpacity>
         <View style={styles.buttonSpacer} />
-        <Button title="Reset" onPress={onReset} />
+        <TouchableOpacity style={styles.resetButton} onPress={onReset}>
+          <Text style={styles.resetButtonText}>↻ Reset</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -141,13 +158,39 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     color: '#1a1a1a',
   },
+  filePickerButton: {
+    backgroundColor: '#6750A4',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  filePickerButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: 0.1,
+    lineHeight: 20,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E7E0EC',
+    marginVertical: 20,
+  },
   controlGroup: {
     marginBottom: 24,
   },
   label: {
     fontSize: 14,
     marginBottom: 10,
-    color: '#4a4a4a',
+    color: '#49454F',
     fontWeight: '500',
   },
   sliderContainer: {
@@ -158,7 +201,7 @@ const styles = StyleSheet.create({
   sliderTrack: {
     flex: 1,
     height: 6,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#E7E0EC',
     borderRadius: 3,
     marginHorizontal: 8,
     position: 'relative',
@@ -166,7 +209,7 @@ const styles = StyleSheet.create({
   sliderFill: {
     position: 'absolute',
     height: '100%',
-    backgroundColor: '#007AFF',
+    backgroundColor: '#6750A4',
     borderRadius: 3,
   },
   sliderThumb: {
@@ -174,13 +217,13 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#6750A4',
     marginLeft: -8,
     marginTop: -5,
   },
   sliderLabel: {
     fontSize: 12,
-    color: '#666',
+    color: '#49454F',
     minWidth: 35,
   },
   toggleRow: {
@@ -190,15 +233,53 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   buttonGroup: {
-    marginTop: 20,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    marginTop: 0,
   },
   buttonSpacer: {
     height: 12,
   },
+  controlButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  playButton: {
+    backgroundColor: '#6750A4',
+  },
+  pauseButton: {
+    backgroundColor: '#7D5260',
+  },
+  controlButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: 0.1,
+    lineHeight: 20,
+  },
+  resetButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#79747E',
+  },
+  resetButtonText: {
+    color: '#6750A4',
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: 0.1,
+    lineHeight: 20,
+  },
 });
 
 export default SettingsPanel;
-

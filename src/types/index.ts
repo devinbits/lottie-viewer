@@ -22,5 +22,6 @@ export interface SettingsPanelProps {
   onPlay: () => void;
   onPause: () => void;
   onReset: () => void;
+  onFilePickerPress: () => void;
 }
 

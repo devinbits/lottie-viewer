@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, DeviceEventEmitter } from 'react-native';
 import LottiePlayer, { type LottiePlayerRef } from './components/LottiePlayer';
 import SettingsPanel from './components/SettingsPanel';
-import FilePickerButton from './components/FilePickerButton';
 import ErrorBoundary from './components/ErrorBoundary';
 import { openFilePicker } from './services/FilePickerService';
 
@@ -100,7 +99,6 @@ function App(props: AppProps): React.JSX.Element {
   return (
     <ErrorBoundary>
       <View style={styles.container}>
-        <FilePickerButton onPress={handleOpenFile} />
         <View style={styles.content}>
           <View style={styles.previewArea}>
             <LottiePlayer
@@ -125,6 +123,7 @@ function App(props: AppProps): React.JSX.Element {
             onPlay={handlePlay}
             onPause={handlePause}
             onReset={handleReset}
+            onFilePickerPress={handleOpenFile}
           />
         </View>
       </View>
