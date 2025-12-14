@@ -7,7 +7,9 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "release:build": "./scripts/build-release.sh",
+    "release:push": "./scripts/push-release.sh"
   },
   "dependencies": {
     "@react-native-community/slider": "^5.1.1",

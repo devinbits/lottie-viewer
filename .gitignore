@@ -44,3 +44,6 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+
+# Release artifacts
+macos/release/
