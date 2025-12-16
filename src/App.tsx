@@ -15,7 +15,7 @@ function AppContent(props: AppProps): React.JSX.Element {
   const { colors } = useTheme();
   const [fileSource, setFileSource] = useState<string | null>(null);
   const [fileSize, setFileSize] = useState<number | null>(null);
-  const [speed, setSpeed] = useState<number>(1.0);
+  const [speed, setSpeed] = useState<number>(0.1);
   const [autoplay, setAutoplay] = useState<boolean>(true);
   const [loop, setLoop] = useState<boolean>(true);
   const [progress, setProgress] = useState<number>(0);
