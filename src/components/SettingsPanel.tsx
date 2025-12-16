@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Switch,
   TouchableOpacity,
 } from 'react-native';
+import { Slider } from '@miblanchard/react-native-slider';
 import type { SettingsPanelProps } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 import { formatFileSize } from '../services/FileSizeService';
@@ -27,21 +28,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onFilePickerPress,
 }) => {
   const { theme, toggleTheme, colors } = useTheme();
-  const [speedTrackWidth, setSpeedTrackWidth] = useState(200);
-  const [progressTrackWidth, setProgressTrackWidth] = useState(200);
-
-  const handleSliderPress = (
-    e: any,
-    trackWidth: number,
-    min: number,
-    max: number,
-    onChange: (value: number) => void
-  ) => {
-    const { locationX } = e.nativeEvent;
-    const percentage = Math.max(0, Math.min(1, locationX / trackWidth));
-    const value = min + percentage * (max - min);
-    onChange(value);
-  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surface, borderLeftColor: colors.border }]}>
@@ -69,7 +55,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       </TouchableOpacity>
 
       {/* File Size Display */}
-      {fileSize !== null && (
+      {fileSize !== null && fileSize !== undefined && (
         <View style={styles.controlGroup}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>
             File Size: {formatFileSize(fileSize)}
@@ -85,28 +71,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <Text style={[styles.label, { color: colors.textSecondary }]}>Playback Speed: {speed.toFixed(1)}x</Text>
         <View style={styles.sliderContainer}>
           <Text style={[styles.sliderLabel, { color: colors.textSecondary }]}>0.1x</Text>
-          <TouchableOpacity
-            style={[styles.sliderTrack, { backgroundColor: colors.border }]}
-            onLayout={(e) => setSpeedTrackWidth(e.nativeEvent.layout.width)}
-            onPress={(e) =>
-              handleSliderPress(e, speedTrackWidth, 0.1, 3.0, (val) =>
-                onSpeedChange(parseFloat(val.toFixed(1)))
-              )
-            }
-            activeOpacity={1}>
-            <View
-              style={[
-                styles.sliderFill,
-                { width: `${((speed - 0.1) / 2.9) * 100}%`, backgroundColor: colors.primary },
-              ]}
-            />
-            <View
-              style={[
-                styles.sliderThumb,
-                { left: `${((speed - 0.1) / 2.9) * 100}%`, backgroundColor: colors.primary },
-              ]}
-            />
-          </TouchableOpacity>
+          <Slider
+            containerStyle={styles.slider}
+            minimumValue={0.1}
+            maximumValue={3.0}
+            value={speed}
+            onValueChange={(values: number[]) => onSpeedChange(parseFloat(values[0].toFixed(1)))}
+            minimumTrackTintColor={colors.primary}
+            maximumTrackTintColor={colors.border}
+            thumbTintColor={colors.primary}
+            step={0.1}
+            animationType="timing"
+          />
           <Text style={[styles.sliderLabel, { color: colors.textSecondary }]}>3.0x</Text>
         </View>
       </View>
@@ -132,21 +108,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <Text style={[styles.label, { color: colors.textSecondary }]}>Progress: {(progress * 100).toFixed(0)}%</Text>
         <View style={styles.sliderContainer}>
           <Text style={[styles.sliderLabel, { color: colors.textSecondary }]}>0%</Text>
-          <TouchableOpacity
-            style={[styles.sliderTrack, { backgroundColor: colors.border }]}
-            onLayout={(e) => setProgressTrackWidth(e.nativeEvent.layout.width)}
-            onPress={(e) =>
-              handleSliderPress(e, progressTrackWidth, 0, 1, onProgressChange)
-            }
-            activeOpacity={1}>
-            <View style={[styles.sliderFill, { width: `${progress * 100}%`, backgroundColor: colors.primary }]} />
-            <View
-              style={[
-                styles.sliderThumb,
-                { left: `${Math.max(0, Math.min(100, progress * 100))}%`, backgroundColor: colors.primary },
-              ]}
-            />
-          </TouchableOpacity>
+          <Slider
+            containerStyle={styles.slider}
+            minimumValue={0}
+            maximumValue={1}
+            value={progress}
+            onValueChange={(values: number[]) => onProgressChange(values[0])}
+            minimumTrackTintColor={colors.primary}
+            maximumTrackTintColor={colors.border}
+            thumbTintColor={colors.primary}
+            step={0.01}
+            animationType="timing"
+          />
           <Text style={[styles.sliderLabel, { color: colors.textSecondary }]}>100%</Text>
         </View>
       </View>
@@ -159,7 +132,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <TouchableOpacity
           style={[
             styles.controlButton,
-            { backgroundColor: isPlaying ? colors.primaryDark : colors.primary }
+            { backgroundColor: isPlaying ? colors.secondary : colors.primary }
           ]}
           onPress={isPlaying ? onPause : onPlay}
         >
@@ -227,25 +200,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 8,
   },
-  sliderTrack: {
+  slider: {
     flex: 1,
-    height: 6,
-    borderRadius: 3,
+    height: 40,
     marginHorizontal: 8,
-    position: 'relative',
-  },
-  sliderFill: {
-    position: 'absolute',
-    height: '100%',
-    borderRadius: 3,
-  },
-  sliderThumb: {
-    position: 'absolute',
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginLeft: -8,
-    marginTop: -5,
   },
   sliderLabel: {
     fontSize: 12,

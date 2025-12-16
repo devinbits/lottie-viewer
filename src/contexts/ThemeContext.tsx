@@ -13,6 +13,7 @@ interface ThemeContextType {
     border: string;
     primary: string;
     primaryDark: string;
+    secondary: string;
     error: string;
     placeholder: string;
   };
@@ -26,6 +27,7 @@ const lightColors = {
   border: '#e0e0e0',
   primary: '#6750A4',
   primaryDark: '#7D5260',
+  secondary: '#FF6B35',
   error: '#d32f2f',
   placeholder: '#f5f5f5',
 };
@@ -38,6 +40,7 @@ const darkColors = {
   border: '#404040',
   primary: '#9d7dd8',
   primaryDark: '#b894c4',
+  secondary: '#FF8C5A',
   error: '#ef5350',
   placeholder: '#2a2a2a',
 };
