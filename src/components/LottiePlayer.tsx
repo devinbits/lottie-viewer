@@ -2,6 +2,7 @@ import React, {useRef, useEffect, forwardRef, useImperativeHandle, useState} fro
 import {View, Text, StyleSheet} from 'react-native';
 import LottieView from 'lottie-react-native';
 import type {LottiePlayerProps} from '../types';
+import { useTheme } from '../contexts/ThemeContext';
 
 export interface LottiePlayerRef {
   play: () => void;
@@ -17,6 +18,7 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
   loop,
   progress,
 }, ref) => {
+  const { colors } = useTheme();
   const animationRef = useRef<LottieView>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -90,8 +92,8 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
 
   if (!source) {
     return (
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>
+      <View style={[styles.placeholder, { backgroundColor: colors.placeholder }]}>
+        <Text style={[styles.placeholderText, { color: colors.textSecondary }]}>
           No file selected{'\n'}Click "Open File" to select a .lottie file
         </Text>
       </View>
@@ -101,9 +103,9 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
   // Show error message if loading failed
   if (loadError) {
     return (
-      <View style={styles.placeholder}>
-        <Text style={styles.errorTitle}>Failed to load animation</Text>
-        <Text style={styles.errorText}>{loadError}</Text>
+      <View style={[styles.placeholder, { backgroundColor: colors.placeholder }]}>
+        <Text style={[styles.errorTitle, { color: colors.error }]}>Failed to load animation</Text>
+        <Text style={[styles.errorText, { color: colors.textSecondary }]}>{loadError}</Text>
       </View>
     );
   }
@@ -126,8 +128,8 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
 
   if (!lottieSource) {
     return (
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>
+      <View style={[styles.placeholder, { backgroundColor: colors.placeholder }]}>
+        <Text style={[styles.placeholderText, { color: colors.textSecondary }]}>
           No file selected{'\n'}Click "Open File" to select a .lottie file
         </Text>
       </View>
@@ -135,17 +137,18 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
   }
 
   return (
-    <View style={styles.container}>
-      <LottieView
-        key={source} // Force re-render when source changes
-        ref={animationRef}
-        source={lottieSource}
-        autoPlay={autoplay && !isScrubbingRef.current}
-        loop={loop}
-        speed={speed}
-        progress={progress}
-        style={styles.animation}
-        resizeMode="contain"
+    <View style={[styles.container, { backgroundColor: colors.placeholder }]}>
+      <View style={styles.animationContainer}>
+        <LottieView
+          key={source} // Force re-render when source changes
+          ref={animationRef}
+          source={lottieSource}
+          autoPlay={autoplay && !isScrubbingRef.current}
+          loop={loop}
+          speed={speed}
+          progress={progress}
+          style={styles.animation}
+          resizeMode="contain"
         onAnimationFailure={(error) => {
           console.error('Lottie animation failed to load:', error);
           console.error('Source URI:', lottieSource.uri);
@@ -166,6 +169,7 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
           }
         }}
       />
+      </View>
     </View>
   );
 });
@@ -175,7 +179,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+  },
+  animationContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   animation: {
     width: '100%',
@@ -185,23 +194,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
   },
   placeholderText: {
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
   },
   errorTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#d32f2f',
     marginBottom: 12,
     textAlign: 'center',
   },
   errorText: {
     fontSize: 14,
-    color: '#666',
     textAlign: 'center',
     paddingHorizontal: 20,
     lineHeight: 20,

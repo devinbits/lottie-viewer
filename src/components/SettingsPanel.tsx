@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import type { SettingsPanelProps } from '../types';
+import { useTheme } from '../contexts/ThemeContext';
+import { formatFileSize } from '../services/FileSizeService';
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
   speed,
@@ -14,6 +16,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   loop,
   progress,
   isPlaying,
+  fileSize,
   onSpeedChange,
   onAutoplayToggle,
   onLoopToggle,
@@ -23,6 +26,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onReset,
   onFilePickerPress,
 }) => {
+  const { theme, toggleTheme, colors } = useTheme();
   const [speedTrackWidth, setSpeedTrackWidth] = useState(200);
   const [progressTrackWidth, setProgressTrackWidth] = useState(200);
 
@@ -40,24 +44,49 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Controls</Text>
+    <View style={[styles.container, { backgroundColor: colors.surface, borderLeftColor: colors.border }]}>
+      <Text style={[styles.title, { color: colors.text }]}>Controls</Text>
 
-      {/* File Picker Button */}
-      <TouchableOpacity style={styles.filePickerButton} onPress={onFilePickerPress}>
-        <Text style={styles.filePickerButtonText}>📁 Open Lottie File</Text>
-      </TouchableOpacity>
+      {/* Theme Toggle */}
+      <View style={styles.controlGroup}>
+        <View style={styles.toggleRow}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            {theme === 'light' ? '☀️ Light' : '🌙 Dark'} Theme
+          </Text>
+          <Switch value={theme === 'dark'} onValueChange={toggleTheme} />
+        </View>
+      </View>
 
       {/* Divider */}
-      <View style={styles.divider} />
+      <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+      {/* File Picker Button */}
+      <TouchableOpacity 
+        style={[styles.filePickerButton, { backgroundColor: colors.primary }]} 
+        onPress={onFilePickerPress}
+      >
+        <Text style={styles.filePickerButtonText}>🗂️ Open Lottie File</Text>
+      </TouchableOpacity>
+
+      {/* File Size Display */}
+      {fileSize !== null && (
+        <View style={styles.controlGroup}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            File Size: {formatFileSize(fileSize)}
+          </Text>
+        </View>
+      )}
+
+      {/* Divider */}
+      <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
       {/* Playback Speed */}
       <View style={styles.controlGroup}>
-        <Text style={styles.label}>Playback Speed: {speed.toFixed(1)}x</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Playback Speed: {speed.toFixed(1)}x</Text>
         <View style={styles.sliderContainer}>
-          <Text style={styles.sliderLabel}>0.1x</Text>
+          <Text style={[styles.sliderLabel, { color: colors.textSecondary }]}>0.1x</Text>
           <TouchableOpacity
-            style={styles.sliderTrack}
+            style={[styles.sliderTrack, { backgroundColor: colors.border }]}
             onLayout={(e) => setSpeedTrackWidth(e.nativeEvent.layout.width)}
             onPress={(e) =>
               handleSliderPress(e, speedTrackWidth, 0.1, 3.0, (val) =>
@@ -68,24 +97,24 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <View
               style={[
                 styles.sliderFill,
-                { width: `${((speed - 0.1) / 2.9) * 100}%` },
+                { width: `${((speed - 0.1) / 2.9) * 100}%`, backgroundColor: colors.primary },
               ]}
             />
             <View
               style={[
                 styles.sliderThumb,
-                { left: `${((speed - 0.1) / 2.9) * 100}%` },
+                { left: `${((speed - 0.1) / 2.9) * 100}%`, backgroundColor: colors.primary },
               ]}
             />
           </TouchableOpacity>
-          <Text style={styles.sliderLabel}>3.0x</Text>
+          <Text style={[styles.sliderLabel, { color: colors.textSecondary }]}>3.0x</Text>
         </View>
       </View>
 
       {/* Autoplay Toggle */}
       <View style={styles.controlGroup}>
         <View style={styles.toggleRow}>
-          <Text style={styles.label}>Autoplay</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Autoplay</Text>
           <Switch value={autoplay} onValueChange={onAutoplayToggle} />
         </View>
       </View>
@@ -93,42 +122,45 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {/* Loop Toggle */}
       <View style={styles.controlGroup}>
         <View style={styles.toggleRow}>
-          <Text style={styles.label}>Loop</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Loop</Text>
           <Switch value={loop} onValueChange={onLoopToggle} />
         </View>
       </View>
 
       {/* Progress Scrubber */}
       <View style={styles.controlGroup}>
-        <Text style={styles.label}>Progress: {(progress * 100).toFixed(0)}%</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Progress: {(progress * 100).toFixed(0)}%</Text>
         <View style={styles.sliderContainer}>
-          <Text style={styles.sliderLabel}>0%</Text>
+          <Text style={[styles.sliderLabel, { color: colors.textSecondary }]}>0%</Text>
           <TouchableOpacity
-            style={styles.sliderTrack}
+            style={[styles.sliderTrack, { backgroundColor: colors.border }]}
             onLayout={(e) => setProgressTrackWidth(e.nativeEvent.layout.width)}
             onPress={(e) =>
               handleSliderPress(e, progressTrackWidth, 0, 1, onProgressChange)
             }
             activeOpacity={1}>
-            <View style={[styles.sliderFill, { width: `${progress * 100}%` }]} />
+            <View style={[styles.sliderFill, { width: `${progress * 100}%`, backgroundColor: colors.primary }]} />
             <View
               style={[
                 styles.sliderThumb,
-                { left: `${Math.max(0, Math.min(100, progress * 100))}%` },
+                { left: `${Math.max(0, Math.min(100, progress * 100))}%`, backgroundColor: colors.primary },
               ]}
             />
           </TouchableOpacity>
-          <Text style={styles.sliderLabel}>100%</Text>
+          <Text style={[styles.sliderLabel, { color: colors.textSecondary }]}>100%</Text>
         </View>
       </View>
 
       {/* Divider */}
-      <View style={styles.divider} />
+      <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
       {/* Playback Controls */}
       <View style={styles.buttonGroup}>
         <TouchableOpacity
-          style={[styles.controlButton, isPlaying ? styles.pauseButton : styles.playButton]}
+          style={[
+            styles.controlButton,
+            { backgroundColor: isPlaying ? colors.primaryDark : colors.primary }
+          ]}
           onPress={isPlaying ? onPause : onPlay}
         >
           <Text style={styles.controlButtonText}>
@@ -136,8 +168,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </Text>
         </TouchableOpacity>
         <View style={styles.buttonSpacer} />
-        <TouchableOpacity style={styles.resetButton} onPress={onReset}>
-          <Text style={styles.resetButtonText}>↻ Reset</Text>
+        <TouchableOpacity 
+          style={[styles.resetButton, { borderColor: colors.border }]} 
+          onPress={onReset}
+        >
+          <Text style={[styles.resetButtonText, { color: colors.primary }]}>↻ Reset</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -148,24 +183,20 @@ const styles = StyleSheet.create({
   container: {
     width: 300,
     padding: 20,
-    backgroundColor: '#fafafa',
     borderLeftWidth: 1,
-    borderLeftColor: '#e0e0e0',
   },
   title: {
     fontSize: 22,
     fontWeight: '600',
     marginBottom: 24,
-    color: '#1a1a1a',
   },
   filePickerButton: {
-    backgroundColor: '#6750A4',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 100,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
@@ -181,8 +212,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#E7E0EC',
-    marginVertical: 20,
+    marginBottom: 24,
   },
   controlGroup: {
     marginBottom: 24,
@@ -190,7 +220,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     marginBottom: 10,
-    color: '#49454F',
     fontWeight: '500',
   },
   sliderContainer: {
@@ -201,7 +230,6 @@ const styles = StyleSheet.create({
   sliderTrack: {
     flex: 1,
     height: 6,
-    backgroundColor: '#E7E0EC',
     borderRadius: 3,
     marginHorizontal: 8,
     position: 'relative',
@@ -209,7 +237,6 @@ const styles = StyleSheet.create({
   sliderFill: {
     position: 'absolute',
     height: '100%',
-    backgroundColor: '#6750A4',
     borderRadius: 3,
   },
   sliderThumb: {
@@ -217,13 +244,11 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#6750A4',
     marginLeft: -8,
     marginTop: -5,
   },
   sliderLabel: {
     fontSize: 12,
-    color: '#49454F',
     minWidth: 35,
   },
   toggleRow: {
@@ -250,12 +275,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 1,
   },
-  playButton: {
-    backgroundColor: '#6750A4',
-  },
-  pauseButton: {
-    backgroundColor: '#7D5260',
-  },
   controlButtonText: {
     color: '#FFFFFF',
     fontSize: 14,
@@ -271,10 +290,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#79747E',
   },
   resetButtonText: {
-    color: '#6750A4',
     fontSize: 14,
     fontWeight: '500',
     letterSpacing: 0.1,

@@ -4,13 +4,17 @@ import LottiePlayer, { type LottiePlayerRef } from './components/LottiePlayer';
 import SettingsPanel from './components/SettingsPanel';
 import ErrorBoundary from './components/ErrorBoundary';
 import { openFilePicker } from './services/FilePickerService';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { getFileSize } from './services/FileSizeService';
 
 interface AppProps {
   fileToOpen?: string;
 }
 
-function App(props: AppProps): React.JSX.Element {
+function AppContent(props: AppProps): React.JSX.Element {
+  const { colors } = useTheme();
   const [fileSource, setFileSource] = useState<string | null>(null);
+  const [fileSize, setFileSize] = useState<number | null>(null);
   const [speed, setSpeed] = useState<number>(1.0);
   const [autoplay, setAutoplay] = useState<boolean>(true);
   const [loop, setLoop] = useState<boolean>(true);
@@ -19,7 +23,7 @@ function App(props: AppProps): React.JSX.Element {
   const animationRef = useRef<LottiePlayerRef>(null);
 
   useEffect(() => {
-    const handleFileOpen = (filePath: string) => {
+    const handleFileOpen = async (filePath: string) => {
       if (filePath) {
         setFileSource(filePath);
         setSpeed(1.0);
@@ -27,6 +31,9 @@ function App(props: AppProps): React.JSX.Element {
         setLoop(true);
         setProgress(0);
         setIsPlaying(true);
+        // Get file size
+        const size = await getFileSize(filePath);
+        setFileSize(size);
       }
     };
 
@@ -34,9 +41,9 @@ function App(props: AppProps): React.JSX.Element {
       handleFileOpen(props.fileToOpen);
     }
 
-    const subscription = DeviceEventEmitter.addListener('openFile', (event) => {
+    const subscription = DeviceEventEmitter.addListener('openFile', async (event) => {
       if (event.url) {
-        handleFileOpen(event.url);
+        await handleFileOpen(event.url);
       }
     });
 
@@ -53,6 +60,9 @@ function App(props: AppProps): React.JSX.Element {
       setLoop(true);
       setProgress(0);
       setIsPlaying(true);
+      // Get file size
+      const size = await getFileSize(filePath);
+      setFileSize(size);
     }
   };
 
@@ -98,7 +108,7 @@ function App(props: AppProps): React.JSX.Element {
 
   return (
     <ErrorBoundary>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.content}>
           <View style={styles.previewArea}>
             <LottiePlayer
@@ -116,6 +126,7 @@ function App(props: AppProps): React.JSX.Element {
             loop={loop}
             progress={progress}
             isPlaying={isPlaying}
+            fileSize={fileSize}
             onSpeedChange={setSpeed}
             onAutoplayToggle={setAutoplay}
             onLoopToggle={setLoop}
@@ -131,10 +142,17 @@ function App(props: AppProps): React.JSX.Element {
   );
 }
 
+function App(props: AppProps): React.JSX.Element {
+  return (
+    <ThemeProvider>
+      <AppContent {...props} />
+    </ThemeProvider>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   content: {
     flex: 1,

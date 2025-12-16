@@ -15,6 +15,7 @@ export interface SettingsPanelProps {
   loop: boolean;
   progress: number;
   isPlaying: boolean;
+  fileSize?: number | null;
   onSpeedChange: (speed: number) => void;
   onAutoplayToggle: (autoplay: boolean) => void;
   onLoopToggle: (loop: boolean) => void;

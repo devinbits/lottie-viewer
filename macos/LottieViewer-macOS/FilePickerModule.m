@@ -1,5 +1,6 @@
 #import <React/RCTBridgeModule.h>
 #import <AppKit/AppKit.h>
+#import <Foundation/Foundation.h>
 
 @interface FilePickerModule : NSObject <RCTBridgeModule>
 @end
@@ -47,6 +48,39 @@ RCT_EXPORT_METHOD(openFilePicker:(RCTPromiseResolveBlock)resolve
       resolve(nil);
     }
   });
+}
+
+RCT_EXPORT_METHOD(getFileSize:(NSString *)filePath
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  if (!filePath || [filePath length] == 0) {
+    NSError *error = [NSError errorWithDomain:@"FilePickerModule"
+                                         code:1
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Invalid file path"}];
+    reject(@"INVALID_PATH", @"Invalid file path", error);
+    return;
+  }
+  
+  NSFileManager *fileManager = [NSFileManager defaultManager];
+  NSError *error = nil;
+  NSDictionary *attributes = [fileManager attributesOfItemAtPath:filePath error:&error];
+  
+  if (error) {
+    reject(@"FILE_ERROR", [error localizedDescription], error);
+    return;
+  }
+  
+  NSNumber *fileSize = [attributes objectForKey:NSFileSize];
+  if (fileSize) {
+    // fileSize is already an NSNumber, pass it directly
+    resolve(fileSize);
+  } else {
+    NSError *error = [NSError errorWithDomain:@"FilePickerModule"
+                                         code:2
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Could not get file size"}];
+    reject(@"SIZE_ERROR", @"Could not get file size", error);
+  }
 }
 
 @end
