@@ -6,18 +6,18 @@ A macOS application for viewing Lottie animation files.
 
 ## Releases
 
-### Latest Release: v1.0.1
+### Latest Release: v1.0.6
 
 Download the latest macOS release:
 
-- **[Download LottieViewer-macOS-1.0.1.zip](macos/macos/release/)**
+- **[Download LottieViewer-macOS.zip](macos/macos/release/)**
 
 #### Installation Instructions
 
-1. Download the `LottieViewer-macOS-1.0.1.zip` file
+1. Download the `LottieViewer-macOS-1.0.6.zip` file
 2. Extract the zip file
 3. Move `LottieViewer.app` to your Applications folder
-4. Open the app from Applications (you may need to allow it in System Preferences > Security & Privacy if macOS blocks it)
+4. **Open the app from Applications (you may need to allow it in System Preferences > Security & Privacy if macOS blocks it)**
 
 ## Development
 
