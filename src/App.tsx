@@ -20,6 +20,8 @@ function AppContent(props: AppProps): React.JSX.Element {
   const [loop, setLoop] = useState<boolean>(true);
   const [progress, setProgress] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [customBackgroundColor, setCustomBackgroundColor] = useState<string>('#ffffff');
+  const [isCustomColorEnabled, setIsCustomColorEnabled] = useState<boolean>(false);
   const animationRef = useRef<LottiePlayerRef>(null);
 
   useEffect(() => {
@@ -118,6 +120,7 @@ function AppContent(props: AppProps): React.JSX.Element {
               autoplay={autoplay}
               loop={loop}
               progress={progress}
+              backgroundColor={isCustomColorEnabled ? customBackgroundColor : colors.surface}
             />
           </View>
           <SettingsPanel
@@ -127,10 +130,14 @@ function AppContent(props: AppProps): React.JSX.Element {
             progress={progress}
             isPlaying={isPlaying}
             fileSize={fileSize}
+            isCustomColorEnabled={isCustomColorEnabled}
+            customBackgroundColor={customBackgroundColor}
             onSpeedChange={setSpeed}
             onAutoplayToggle={setAutoplay}
             onLoopToggle={setLoop}
             onProgressChange={handleProgressChange}
+            onCustomColorEnabledChange={setIsCustomColorEnabled}
+            onCustomBackgroundColorChange={setCustomBackgroundColor}
             onPlay={handlePlay}
             onPause={handlePause}
             onReset={handleReset}

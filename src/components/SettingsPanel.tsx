@@ -5,6 +5,8 @@ import {
   StyleSheet,
   Switch,
   TouchableOpacity,
+  TextInput,
+  ScrollView,
 } from 'react-native';
 import { Slider } from '@miblanchard/react-native-slider';
 import type { SettingsPanelProps } from '../types';
@@ -26,11 +28,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onPause,
   onReset,
   onFilePickerPress,
+  isCustomColorEnabled,
+  customBackgroundColor,
+  onCustomColorEnabledChange,
+  onCustomBackgroundColorChange,
 }) => {
   const { theme, toggleTheme, colors } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface, borderLeftColor: colors.border }]}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: colors.surface, borderLeftColor: colors.border }]}
+      contentContainerStyle={styles.contentContainer}
+    >
       <Text style={[styles.title, { color: colors.text }]}>Controls</Text>
 
       {/* Theme Toggle */}
@@ -41,6 +50,34 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </Text>
           <Switch value={theme === 'dark'} onValueChange={toggleTheme} />
         </View>
+      </View>
+
+      {/* Background Color Settings */}
+      <View style={styles.controlGroup}>
+        <View style={styles.toggleRow}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Custom Background</Text>
+          <Switch value={isCustomColorEnabled} onValueChange={onCustomColorEnabledChange} />
+        </View>
+        {isCustomColorEnabled && (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={[
+                styles.textInput,
+                { 
+                  color: colors.text, 
+                  borderColor: colors.border,
+                  backgroundColor: colors.background 
+                }
+              ]}
+              value={customBackgroundColor}
+              onChangeText={onCustomBackgroundColorChange}
+              placeholder="#FFFFFF"
+              placeholderTextColor={colors.textSecondary}
+              maxLength={7}
+            />
+            <View style={[styles.colorPreview, { backgroundColor: customBackgroundColor, borderColor: colors.border }]} />
+          </View>
+        )}
       </View>
 
       {/* Divider */}
@@ -148,15 +185,19 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <Text style={[styles.resetButtonText, { color: colors.primary }]}>↻ Reset</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    width: 300,
-    padding: 20,
+    maxWidth: 350,
+    minWidth: 300,
     borderLeftWidth: 1,
+  },
+  contentContainer: {
+    padding: 20,
+    paddingBottom: 40,
   },
   title: {
     fontSize: 22,
@@ -254,6 +295,23 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: 0.1,
     lineHeight: 20,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 12,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 14,
+    padding:12
+  },
+  colorPreview: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1,
   },
 });
 

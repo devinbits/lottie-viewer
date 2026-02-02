@@ -17,6 +17,7 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
   autoplay,
   loop,
   progress,
+  backgroundColor,
 }, ref) => {
   const { colors } = useTheme();
   const animationRef = useRef<LottieView>(null);
@@ -137,7 +138,7 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.placeholder }]}>
+    <View style={[styles.container, { backgroundColor: backgroundColor || colors.placeholder }]}>
       <View style={styles.animationContainer}>
         <LottieView
           key={source} // Force re-render when source changes
@@ -177,6 +178,7 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 32,
     justifyContent: 'center',
     alignItems: 'center',
   },
