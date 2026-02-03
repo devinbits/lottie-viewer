@@ -73,6 +73,7 @@
    </AnalyzeAction>
    <ArchiveAction
       buildConfiguration = "Release"
+      customArchiveName = "QuickLottieViewer"
       revealArchiveInOrganizer = "YES">
    </ArchiveAction>
 </Scheme>
