@@ -132,7 +132,9 @@ pipeline {
     post {
         always {
             echo 'Build finished.'
-            archiveArtifacts artifacts: "macos/release/LottieViewer-macOS-*.zip", followSymlinks: false
+            script {
+                archiveArtifacts artifacts: "macos/release/LottieViewer-macOS-*.zip", followSymlinks: false
+            }
         }
         success {
             echo 'Build was successful! Creating git tag...'
