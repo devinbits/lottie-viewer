@@ -4,6 +4,18 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 A macOS application for viewing Lottie animation files.
 
+## Privacy Policy
+
+QuickLottieViewer does not collect, store, transmit, or share any personal data.
+
+All .lottie files opened in the app are processed locally on the user’s device. 
+The app does not use analytics, advertising, tracking technologies, or network services.
+
+No user information is collected, and no data is sent to external servers.
+
+If you have questions about this privacy policy, you may contact:
+adityanabbhinav@gmail.com
+
 ## Releases
 
 ### Latest Release: v1.0.6
