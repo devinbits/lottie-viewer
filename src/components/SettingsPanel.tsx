@@ -11,7 +11,6 @@ import {
 import { Slider } from '@miblanchard/react-native-slider';
 import type { SettingsPanelProps } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
-import { formatFileSize } from '../services/FileSizeService';
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
   speed,
@@ -19,7 +18,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   loop,
   progress,
   isPlaying,
-  fileSize,
   onSpeedChange,
   onAutoplayToggle,
   onLoopToggle,
@@ -27,7 +25,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onPlay,
   onPause,
   onReset,
-  onFilePickerPress,
   isCustomColorEnabled,
   customBackgroundColor,
   onCustomColorEnabledChange,
@@ -55,7 +52,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {/* Background Color Settings */}
       <View style={styles.controlGroup}>
         <View style={styles.toggleRow}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Custom Background</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Container Background</Text>
           <Switch value={isCustomColorEnabled} onValueChange={onCustomColorEnabledChange} />
         </View>
         {isCustomColorEnabled && (
@@ -79,26 +76,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </View>
         )}
       </View>
-
-      {/* Divider */}
-      <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-      {/* File Picker Button */}
-      <TouchableOpacity 
-        style={[styles.filePickerButton, { backgroundColor: colors.primary }]} 
-        onPress={onFilePickerPress}
-      >
-        <Text style={styles.filePickerButtonText}>🗂️ Open Lottie File</Text>
-      </TouchableOpacity>
-
-      {/* File Size Display */}
-      {fileSize !== null && fileSize !== undefined && (
-        <View style={styles.controlGroup}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>
-            File Size: {formatFileSize(fileSize)}
-          </Text>
-        </View>
-      )}
 
       {/* Divider */}
       <View style={[styles.divider, { backgroundColor: colors.border }]} />
@@ -258,11 +235,14 @@ const styles = StyleSheet.create({
   },
   buttonGroup: {
     marginTop: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   buttonSpacer: {
-    height: 12,
+    width: 12,
   },
   controlButton: {
+    flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 24,
     borderRadius: 100,
@@ -282,6 +262,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   resetButton: {
+    flex: 1,
     backgroundColor: 'transparent',
     paddingVertical: 10,
     paddingHorizontal: 24,

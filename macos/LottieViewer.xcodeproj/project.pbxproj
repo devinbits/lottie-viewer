@@ -427,6 +427,7 @@
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				CODE_SIGN_ENTITLEMENTS = "LottieViewer-macOS/LottieViewer.entitlements";
 			};
 			name = Debug;
 		};

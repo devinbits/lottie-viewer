@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export type Theme = 'light' | 'dark';
 
-interface ThemeContextType {
+export interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
   colors: {
@@ -26,7 +26,7 @@ const lightColors = {
   textSecondary: '#49454F',
   border: '#e0e0e0',
   primary: '#6750A4',
-  primaryDark: '#7D5260',
+  primaryDark: '#9a57b0ff',
   secondary: '#FF6B35',
   error: '#d32f2f',
   placeholder: '#f5f5f5',
@@ -39,7 +39,7 @@ const darkColors = {
   textSecondary: '#b0b0b0',
   border: '#404040',
   primary: '#9d7dd8',
-  primaryDark: '#b894c4',
+  primaryDark: '#9b4ab6ff',
   secondary: '#FF8C5A',
   error: '#ef5350',
   placeholder: '#2a2a2a',
