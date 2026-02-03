@@ -270,7 +270,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../node_modules/react-native-macos/scripts/react-native-xcode.sh\n";
+			shellScript = "#!/bin/sh\nset -e\n\nexport NVM_DIR=\"$HOME/.nvm\"\n[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"\n\nexport NODE_BINARY=\"$(which node)\"\n\nif [ -z \"$NODE_BINARY\" ]; then\n  echo \"❌ Node binary not found\"\n  exit 1\nfi\n\n../node_modules/react-native/scripts/react-native-xcode.sh\n\n";
 		};
 		C16B481251B037588C3601FC /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
