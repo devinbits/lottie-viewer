@@ -16,7 +16,6 @@ export interface SettingsPanelProps {
   loop: boolean;
   progress: number;
   isPlaying: boolean;
-  fileSize?: number | null;
   isCustomColorEnabled: boolean;
   customBackgroundColor: string;
   onSpeedChange: (speed: number) => void;
@@ -28,6 +27,9 @@ export interface SettingsPanelProps {
   onPlay: () => void;
   onPause: () => void;
   onReset: () => void;
-  onFilePickerPress: () => void;
 }
 
+export interface FileInfo {
+  uri: string;
+  size: number | null;
+}

@@ -27,7 +27,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onPlay,
   onPause,
   onReset,
-  onFilePickerPress,
   isCustomColorEnabled,
   customBackgroundColor,
   onCustomColorEnabledChange,
@@ -82,23 +81,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
       {/* Divider */}
       <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-      {/* File Picker Button */}
-      <TouchableOpacity 
-        style={[styles.filePickerButton, { backgroundColor: colors.primary }]} 
-        onPress={onFilePickerPress}
-      >
-        <Text style={styles.filePickerButtonText}>🗂️ Open Lottie File</Text>
-      </TouchableOpacity>
-
-      {/* File Size Display */}
-      {fileSize !== null && fileSize !== undefined && (
-        <View style={styles.controlGroup}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>
-            File Size: {formatFileSize(fileSize)}
-          </Text>
-        </View>
-      )}
 
       {/* Divider */}
       <View style={[styles.divider, { backgroundColor: colors.border }]} />
