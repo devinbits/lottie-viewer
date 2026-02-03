@@ -48,3 +48,6 @@ buck-out/
 # Release artifacts - ignore everything except .zip files
 macos/release/*
 !macos/release/*.zip
+
+# Local scripts
+scripts/local-release-build.sh
