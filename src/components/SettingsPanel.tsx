@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   controlGroup: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   label: {
     fontSize: 14,

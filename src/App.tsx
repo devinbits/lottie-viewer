@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, DeviceEventEmitter } from 'react-native';
+import { View, StyleSheet, DeviceEventEmitter, Alert } from 'react-native';
 import LottiePlayer, { type LottiePlayerRef } from './components/LottiePlayer';
 import SettingsPanel from './components/SettingsPanel';
 import FilePanel from './components/FilePanel';
@@ -8,6 +8,15 @@ import { openFilePicker } from './services/FilePickerService';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { getFileSize } from './services/FileSizeService';
 import type { FileInfo } from './types';
+
+// Simple URL validation helper
+const isValidUrl = (url: string) => {
+  try {
+    return url.startsWith('http://') || url.startsWith('https://');
+  } catch (e) {
+    return false;
+  }
+};
 
 interface AppProps {
   fileToOpen?: string;
@@ -89,6 +98,22 @@ function AppContent(props: AppProps): React.JSX.Element {
     }
   };
 
+  const handleAddUrl = (url: string) => {
+    const trimmedUrl = url.trim();
+    if (!isValidUrl(trimmedUrl)) {
+      Alert.alert('Invalid URL', 'Please enter a valid HTTP or HTTPS URL.');
+      return;
+    }
+
+    setFiles(prev => {
+      if (!prev.some(f => f.uri === trimmedUrl)) {
+        return [...prev, { uri: trimmedUrl, size: null }];
+      }
+      return prev;
+    });
+    handleSelectFile(trimmedUrl);
+  };
+
   const handleSelectFile = async (filePath: string) => {
     setSelectedFile(filePath);
     // Reset controls or keep them? Usually switching files resets state unless we want persistence per file.
@@ -121,6 +146,17 @@ function AppContent(props: AppProps): React.JSX.Element {
       }
       return newFiles;
     });
+  };
+
+  const handleLottieError = (error: string) => {
+    if (selectedFile && (selectedFile.startsWith('http://') || selectedFile.startsWith('https://'))) {
+      Alert.alert('Error loading Lottie', `Failed to load animation from URL. Please check the URL and try again.\n\nError: ${error}`, [
+        {
+          text: 'OK',
+          onPress: () => handleRemoveFile(selectedFile),
+        },
+      ]);
+    }
   };
 
   const handlePlay = () => {
@@ -177,6 +213,7 @@ function AppContent(props: AppProps): React.JSX.Element {
                 loop={loop}
                 progress={progress}
                 backgroundColor={isCustomColorEnabled ? customBackgroundColor : colors.surface}
+                onError={handleLottieError}
               />
             </View>
             <FilePanel
@@ -184,6 +221,7 @@ function AppContent(props: AppProps): React.JSX.Element {
               selectedFile={selectedFile}
               onFileSelect={handleSelectFile}
               onAddFile={handleAddFile}
+              onAddUrl={handleAddUrl}
               onRemoveFile={handleRemoveFile}
               colors={colors}
             />

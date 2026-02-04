@@ -11,14 +11,16 @@ export interface LottiePlayerRef {
   setProgress: (progress: number) => void;
 }
 
-const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
-  source,
-  speed,
-  autoplay,
-  loop,
-  progress,
-  backgroundColor,
-}, ref) => {
+const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>((props, ref) => {
+  const {
+    source,
+    speed,
+    autoplay,
+    loop,
+    progress,
+    backgroundColor,
+    onError,
+  } = props;
   const { colors } = useTheme();
   const animationRef = useRef<LottieView>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -67,10 +69,16 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
     }
   }, [progress, source]);
 
+  // Track which sources have already reported errors to avoid loops
+  const reportedErrorsRef = useRef<Set<string>>(new Set());
+
   // Handle source changes - reset animation and clear errors
   useEffect(() => {
     if (source) {
       setLoadError(null); // Clear any previous errors when loading new file
+      // If we're loading a new source, we can allow it to report errors again
+      reportedErrorsRef.current.delete(source);
+      
       if (animationRef.current) {
         animationRef.current.reset();
         if (autoplay) {
@@ -95,7 +103,7 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
     return (
       <View style={[styles.placeholder, { backgroundColor: colors.placeholder }]}>
         <Text style={[styles.placeholderText, { color: colors.textSecondary }]}>
-          No file selected{'\n'}Click "Open File" to select a .lottie file
+          No file selected{'\n'}Click "+" or "URL" to open a .lottie file
         </Text>
       </View>
     );
@@ -120,6 +128,11 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
       return {uri: source};
     }
     
+    // Handle http/https URLs
+    if (source.startsWith('http://') || source.startsWith('https://')) {
+      return {uri: source};
+    }
+    
     // Otherwise, try both formats
     // First try with file:// prefix
     return {uri: `file://${source}`};
@@ -131,7 +144,7 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
     return (
       <View style={[styles.placeholder, { backgroundColor: colors.placeholder }]}>
         <Text style={[styles.placeholderText, { color: colors.textSecondary }]}>
-          No file selected{'\n'}Click "Open File" to select a .lottie file
+          No file selected{'\n'}Click "+" or "URL" to open a .lottie file
         </Text>
       </View>
     );
@@ -151,17 +164,31 @@ const LottiePlayer = forwardRef<LottiePlayerRef, LottiePlayerProps>(({
           style={styles.animation}
           resizeMode="contain"
         onAnimationFailure={(error) => {
+          if (!source || reportedErrorsRef.current.has(source)) return;
+          
+          reportedErrorsRef.current.add(source);
           console.error('Lottie animation failed to load:', error);
           console.error('Source URI:', lottieSource.uri);
+          
           // Extract error message
-          const errorMessage = typeof error === 'string' 
-            ? error 
-            : error?.message || 'Unknown error occurred while loading the animation';
+          let errorMessage = 'Unknown error occurred while loading the animation';
+          if (typeof error === 'string') {
+            errorMessage = error;
+          } else if (error && typeof error === 'object') {
+            errorMessage = (error as any).message || JSON.stringify(error);
+          }
+          
           setLoadError(errorMessage);
+          if (onError) {
+            onError(errorMessage);
+          }
         }}
         onAnimationLoaded={() => {
           console.log('Lottie animation loaded successfully');
-          setLoadError(null); // Clear any previous errors on successful load
+          setLoadError(null); 
+          if (source) {
+            reportedErrorsRef.current.delete(source);
+          }
         }}
         onAnimationLoop={() => {
           // Update progress when animation loops (if not scrubbing)

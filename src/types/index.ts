@@ -8,6 +8,7 @@ export interface LottiePlayerProps {
   onPlay?: () => void;
   onPause?: () => void;
   onReset?: () => void;
+  onError?: (error: string) => void;
 }
 
 export interface SettingsPanelProps {
